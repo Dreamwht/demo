@@ -5,9 +5,10 @@
 <script>
 export default {
   created () {
-    this.axios.get('/api/data?id=1')
+    // this.axios.get('/api/data?id=1')
   }
 }
+
 </script>
 
 <style>

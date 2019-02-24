@@ -9,14 +9,30 @@
 export default {
   data () {
     return {
-      list: [5, 20, 36, 10, 10, 20]
+      list: [],
+      index: 0,
+      timerId: 0
     }
   },
   created () {
     this.getList()
-  },
-  mounted () {
-    this.drawLine()
+    this.timerId = setInterval(() => {
+      this.index++
+      console.log(111)
+      if (this.index > 3) {
+        clearInterval(this.timerId)
+        return false
+      }
+      this.axios.get('http://localhost:3003/list?id=' + this.index).then(res => {
+        console.log(res)
+        let {data} = res
+        this.list = data[0].data
+        this.drawLine()
+      })
+      // } catch (e) {
+      //   return false
+      // }
+    }, 1000)
   },
   methods: {
     drawLine () {
@@ -48,12 +64,16 @@ export default {
     },
     update () {
     },
-    getList () {
-      this.axios.get('/api/data').then(res => {
-        console.log(res)
-      }).catch(err => {
-        console.log(err)
-      })
+    async getList () {
+      try {
+        let res = await this.axios.get(' http://localhost:3003/list')
+        // console.log(res)
+        let {data} = res
+        this.list = data[0].data
+        this.drawLine()
+      } catch (e) {
+        console.log(e)
+      }
     }
 
   }
