@@ -11,28 +11,12 @@ export default {
     return {
       list: [],
       index: 0,
-      timerId: 0
+      timerId: 0,
+      current: 0
     }
   },
   created () {
-    this.getList()
-    this.timerId = setInterval(() => {
-      this.index++
-      console.log(111)
-      if (this.index > 3) {
-        clearInterval(this.timerId)
-        return false
-      }
-      this.axios.get('http://localhost:3003/list?id=' + this.index).then(res => {
-        console.log(res)
-        let {data} = res
-        this.list = data[0].data
-        this.drawLine()
-      })
-      // } catch (e) {
-      //   return false
-      // }
-    }, 1000)
+    this.update()
   },
   methods: {
     drawLine () {
@@ -58,11 +42,35 @@ export default {
       myChart.setOption(option)
     },
     send () {
-      this.axios.post('/api/history', {
-        list: this.list
+      this.current++
+      this.axios.post('http://localhost:3003/history', {
+        id: this.current,
+        data: this.list
       })
     },
     update () {
+      this.getList()
+      this.timerId = setInterval(async () => {
+        this.index++
+        // console.log(this.index)
+        if (this.index > 3) {
+          clearInterval(this.timerId)
+          return false
+        }
+        let res = await this.axios.get('http://localhost:3003/list?id=' + this.index)
+        // console.log(res)
+        let {data} = res
+        this.list = data[0].data
+        this.drawLine()
+        try {
+          await this.axios.post('http://localhost:3003/data', {
+            id: +new Date(),
+            data: this.list
+          })
+        } catch (e) {
+          console.log(e)
+        }
+      }, 1000)
     },
     async getList () {
       try {
